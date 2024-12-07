@@ -78,6 +78,7 @@
 - .DS_Store
 
 ## 项目结构 
+```
 ├── manifest.json # 扩展配置文件
 ├── popup.html # 弹出窗口界面
 ├── popup.css # 样式文件
@@ -88,6 +89,7 @@
 │ ├── en # 英文
 │ └── zh_CN # 中文
 └── images # 图标资源
+```
 
 
 ## 反馈建议
