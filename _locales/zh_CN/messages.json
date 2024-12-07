@@ -1,0 +1,107 @@
+{
+  "extensionName": {
+    "message": "一键调整浏览器窗口",
+    "description": "扩展的名称"
+  },
+  "extensionDescription": {
+    "message": "自动调整浏览器窗口尺寸的工具",
+    "description": "扩展的描述"
+  },
+  "predefinedSizes": {
+    "message": "预定义尺寸"
+  },
+  "recentSizes": {
+    "message": "最近使用"
+  },
+  "customSize": {
+    "message": "自定义尺寸"
+  },
+  "width": {
+    "message": "宽度"
+  },
+  "height": {
+    "message": "高度"
+  },
+  "add": {
+    "message": "添加"
+  },
+  "apply": {
+    "message": "应用"
+  },
+  "delete": {
+    "message": "删除"
+  },
+  "sizeFormat": {
+    "message": "$WIDTH$ × $HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeWindowTo": {
+    "message": "调整窗口到 $WIDTH$×$HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "removeFromRecent": {
+    "message": "从最近使用中移除"
+  },
+  "invalidSizeError": {
+    "message": "请输入有效的宽度和高度"
+  },
+  "initError": {
+    "message": "初始化失败:"
+  },
+  "resizeError": {
+    "message": "调整窗口大小失败:"
+  },
+  "addRecentError": {
+    "message": "添加最近使用失败:"
+  },
+  "addCustomError": {
+    "message": "添加自定义尺寸失败:"
+  },
+  "deletePredefinedError": {
+    "message": "删除预定义尺寸失败:"
+  },
+  "deleteRecentError": {
+    "message": "删除最近使用尺寸失败:"
+  },
+  "getCurrentSize": {
+    "message": "获取当前尺寸"
+  },
+  "duplicateSizeError": {
+    "message": "该尺寸已存在！"
+  },
+  "windowPosition": {
+    "message": "调整尺寸后窗口位置"
+  },
+  "topLeft": {
+    "message": "左上角"
+  },
+  "topRight": {
+    "message": "右上角"
+  },
+  "center": {
+    "message": "居中"
+  },
+  "bottomLeft": {
+    "message": "左下角"
+  },
+  "bottomRight": {
+    "message": "右下角"
+  },
+  "feedback": {
+    "message": "反馈与建议"
+  }
+}

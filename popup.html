@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1 data-i18n="extensionName"></h1>
+
+  <div class="section">
+    <h2 data-i18n="predefinedSizes"></h2>
+    <div id="predefined-sizes"></div>
+  </div>
+
+  <div class="section">
+    <h2 data-i18n="recentSizes"></h2>
+    <div id="recent-sizes"></div>
+  </div>
+
+  <div class="custom-size">
+    <h2 data-i18n="customSize"></h2>
+    <div class="input-container">
+      <div class="size-input-group">
+        <input type="number" id="width" data-i18n-placeholder="width" min="100">
+        <span class="unit">px</span>
+      </div>
+      <div class="size-input-group">
+        <input type="number" id="height" data-i18n-placeholder="height" min="100">
+        <span class="unit">px</span>
+      </div>
+      <button id="add-custom" data-i18n="add"></button>
+    </div>
+    <button id="getCurrentSize" data-i18n="getCurrentSize"></button>
+  </div>
+
+  <div class="window-position">
+    <h2 data-i18n="windowPosition"></h2>
+    <div class="position-buttons">
+      <button class="position-btn" data-position="topLeft" data-i18n="topLeft"></button>
+      <button class="position-btn" data-position="topRight" data-i18n="topRight"></button>
+      <button class="position-btn" data-position="center" data-i18n="center"></button>
+      <button class="position-btn" data-position="bottomLeft" data-i18n="bottomLeft"></button>
+      <button class="position-btn" data-position="bottomRight" data-i18n="bottomRight"></button>
+    </div>
+  </div>
+
+  <div class="feedback-section">
+    <a href="https://forms.gle/EEUW5SXdhwi4QHmp6" target="_blank" data-i18n="feedback">Feedback</a>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

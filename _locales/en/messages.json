@@ -1,0 +1,107 @@
+{
+  "extensionName": {
+    "message": "Easy Window Resizer",
+    "description": "The name of the extension"
+  },
+  "extensionDescription": {
+    "message": "A tool to easily resize browser windows",
+    "description": "The description of the extension"
+  },
+  "predefinedSizes": {
+    "message": "Predefined Sizes"
+  },
+  "recentSizes": {
+    "message": "Recent Sizes"
+  },
+  "customSize": {
+    "message": "Custom Size"
+  },
+  "width": {
+    "message": "Width"
+  },
+  "height": {
+    "message": "Height"
+  },
+  "add": {
+    "message": "Add"
+  },
+  "apply": {
+    "message": "Apply"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "sizeFormat": {
+    "message": "$WIDTH$ × $HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeWindowTo": {
+    "message": "Resize window to $WIDTH$×$HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "removeFromRecent": {
+    "message": "Remove from recent"
+  },
+  "invalidSizeError": {
+    "message": "Please enter valid width and height"
+  },
+  "initError": {
+    "message": "Initialization failed:"
+  },
+  "resizeError": {
+    "message": "Failed to resize window:"
+  },
+  "addRecentError": {
+    "message": "Failed to add to recent:"
+  },
+  "addCustomError": {
+    "message": "Failed to add custom size:"
+  },
+  "deletePredefinedError": {
+    "message": "Failed to delete predefined size:"
+  },
+  "deleteRecentError": {
+    "message": "Failed to delete recent size:"
+  },
+  "getCurrentSize": {
+    "message": "Get Current Size"
+  },
+  "duplicateSizeError": {
+    "message": "This size already exists!"
+  },
+  "windowPosition": {
+    "message": "Window Position after resizing"
+  },
+  "topLeft": {
+    "message": "Top Left"
+  },
+  "topRight": {
+    "message": "Top Right"
+  },
+  "center": {
+    "message": "Center"
+  },
+  "bottomLeft": {
+    "message": "Bottom Left"
+  },
+  "bottomRight": {
+    "message": "Bottom Right"
+  },
+  "feedback": {
+    "message": "Feedback & Suggestions"
+  }
+} 
