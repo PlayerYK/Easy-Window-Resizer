@@ -1,115 +1,72 @@
-# Easy Window Resizer 一键调整浏览器窗口
+# Easy Window Resizer 开发说明
 
-一款简单易用的 Chrome 扩展,帮助您快速调整浏览器窗口大小。
+一款用于一键调整浏览器窗口尺寸与位置的 Chrome 扩展。近期更新聚焦于“仅在当前屏幕内定位”，在多显示器环境中不再跳到其他屏幕，并精简为最小必要权限。
 
-## 主要功能
+## 功能概览
 
-### 1. 预设尺寸快速调整
-- 内置多个常用屏幕分辨率尺寸
-- 一键点击即可调整窗口大小
-- 支持删除不需要的预设尺寸
+- 预设尺寸：内置常用分辨率，一键应用，支持删除
+- 自定义尺寸：任意输入宽高，可保存为预设，支持一键获取当前尺寸
+- 最近使用：自动记录最近 5 个尺寸，便于复用
+- 位置控制：左上 / 右上 / 居中 / 左下 / 右下；调整尺寸后自动在“当前屏幕”内定位
 
-### 2. 自定义尺寸
-- 可输入任意宽度和高度
-- 保存为预设尺寸以便重复使用
-- 支持获取当前窗口尺寸
+## 近期更新（面向开发者）
 
-### 3. 最近使用记录
-- 自动记录最近使用过的5个尺寸
-- 方便重复使用
-- 支持删除历史记录
+- 仅在当前屏幕定位：通过注入读取 `screen.availLeft/Top/Width/Height`，保证窗口留在当前显示器
+- 移除 ChromeOS 专属依赖：删除 `chrome.system.display` 使用，避免在 macOS/Windows 失效
+- 最小权限集：使用 `activeTab` + `scripting` 临时注入，避免敏感的 `tabs` 权限
+- 状态处理与降级：最大化/全屏先恢复到 normal；受限页面（如 `chrome://`）注入失败时仅调整尺寸，不强制移动
 
-### 4. 窗口位置控制
-- 支持5种窗口位置:左上、右上、居中、左下、右下
-- 调整尺寸后自动定位到指定位置
-- 位置设置自动保存
+## 权限说明（Manifest V3）
 
-## 技术特点
+- `windows`: 调整浏览器窗口尺寸与位置
+- `storage`: 保存预设、最近使用、位置偏好
+- `scripting`: 在活动标签页注入脚本以读取当前屏幕边界
+- `activeTab`: 用户手势触发时，对当前活动标签页临时授权注入
 
-- 使用 Chrome Extension Manifest V3
-- 支持中英文双语言
-- 使用 Chrome Storage Sync API 实现配置同步
-- 响应式界面设计
-- 平滑的动画过渡效果
+已移除：`system.display`（ChromeOS 专属，桌面平台不可用）。
 
-## 使用场景
+## 工作原理（简）
 
-- 前端开发测试不同屏幕尺寸下的页面展示
-- UI设计师验证设计稿在不同分辨率下的效果
-- 需要精确控制窗口大小的场景
-- 经常需要在固定尺寸下工作的用户
+- 尺寸调整：`chrome.windows.update(windowId, { width, height })`
+- 当前屏边界：在活动标签页注入脚本，读取 `screen.availLeft/Top/Width/Height`
+- 位置计算：基于上述边界与窗口宽高计算目标 `left/top`，再 `chrome.windows.update(windowId, { left, top })`
+- 降级处理：无法注入（特殊页面）则跳过移动，只执行尺寸调整
 
-## 安装方式
+## 安装与使用
 
-1. 从 Chrome 网上应用店安装
-2. 下载源码后手动加载:
-   - 打开 Chrome 扩展程序页面 (chrome://extensions/)
-   - 开启"开发者模式"
-   - 点击"加载已解压的扩展程序"
-   - 选择项目目录
+1. Chrome 网上应用店安装
+2. 或手动加载：
+   - 打开 `chrome://extensions/`
+   - 开启“开发者模式”
+   - 选择“加载已解压的扩展程序”，指向项目目录
 
-## 打包说明
+## 打包
 
-项目提供了两个打包脚本，会自动读取 manifest.json 中的版本号，并生成 `Easy_window_resizer_v[版本号].zip` 格式的压缩包。
+提供 Windows/Mac/Linux 脚本，按 `manifest.json` 版本输出 `Easy_window_resizer_v[版本号].zip`，并排除非必要文件。
 
-### Windows 系统
-运行 `build.bat` 即可完成打包，会自动排除以下文件：
-- store 目录
-- README.md
-- build.bat
-- .git 相关文件
+- Windows：运行 `build.bat`
+- Mac/Linux：首次执行 `chmod +x build.sh`，然后 `./build.sh`
 
-### Mac/Linux 系统
-1. 首次使用前给脚本添加执行权限：
-   ```bash
-   chmod +x build.sh
-   ```
+## 项目结构
 
-2. 运行脚本完成打包：
-   ```bash
-   ./build.sh
-   ```
-
-脚本会自动排除以下文件：
-- store 目录
-- README.md
-- build.sh
-- .git 相关文件
-- .DS_Store
-
-## 项目结构 
 ```
-├── manifest.json # 扩展配置文件
-├── popup.html # 弹出窗口界面
-├── popup.css # 样式文件
-├── popup.js # 主要逻辑代码
-├── background.js # 后台服务
-├── i18n.js # 国际化处理
-├── locales # 语言文件
-│ ├── en # 英文
-│ └── zh_CN # 中文
-└── images # 图标资源
+├── manifest.json        # 扩展配置
+├── background.js        # 后台：定位逻辑、消息处理
+├── popup.html/.css/.js  # 弹窗 UI 与交互
+├── i18n.js              # 国际化初始化
+├── _locales/            # 语言资源（en, zh_CN）
+└── images/              # 图标
 ```
 
+## 兼容性与边界
 
-## 反馈建议
+- 平台：macOS / Windows（多显示器支持，始终保持在“当前屏”内）
+- 特殊页面：`chrome://`、扩展商店等页面无法注入脚本，降级为仅改尺寸
+- 窗口状态：最大化/全屏会先恢复到 normal 再移动
 
-如果您在使用过程中遇到任何问题或有改进建议,欢迎通过以下方式反馈:
+## 反馈与贡献
 
-- 在 GitHub 上提交 Issue
-- 通过扩展中的反馈链接提交
+- 使用中的问题或建议：可通过扩展内的反馈链接提交
+- PR 指南：保持风格一致、补充必要说明、验证功能再提交
 
-## 开源协议
-
-MIT License
-
-## 贡献指南
-
-欢迎提交 Pull Request 来改进这个项目。在提交之前,请确保:
-
-1. 代码风格保持一致
-2. 添加必要的注释
-3. 更新相关文档
-4. 测试功能正常
-
-感谢使用 Easy Window Resizer!
+License: MIT

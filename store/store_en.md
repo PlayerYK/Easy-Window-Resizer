@@ -1,43 +1,23 @@
-# Easy Window Resizer - Resize Browser Windows with One Click
+# Easy Window Resizer - Resize and Position Windows Effortlessly
 
-A simple and user-friendly browser extension that allows you to effortlessly resize your browser window to any dimension.
+A simple, user-friendly extension to quickly resize your browser window and snap it to a position within your current screen.
 
 ## Key Features
 
-### 1. Quick Resize with Predefined Sizes
-- Built-in common screen resolution presets
-- Resize windows with a single click
-- Remove unwanted preset sizes
+- Preset sizes: common resolutions, one-click apply
+- Custom sizes: enter any width/height and save as presets
+- Recent list: remembers your latest 5 sizes for reuse
+- Get current size: one click to capture current dimensions
+- Window positions: Top Left / Top Right / Center / Bottom Left / Bottom Right
 
-### 2. Custom Dimensions
-- Input any width and height
-- Save custom sizes as presets
+## What’s New
 
-### 3. Recent Sizes History
-- Automatically records your 5 most recently used sizes
-- Easy access to frequently used dimensions
-- Manage history with delete option
+- In multi-monitor setups, the window now stays on your current screen when positioning (no more jumping to other displays)
+- Leaner permissions for a safer experience
 
-### 4. Current Size Capture
-- Get current window dimensions with one click
+## Great For
 
-### 5. Window Position Control
-- 5 position options: Top Left, Top Right, Center, Bottom Left, Bottom Right
-- Automatic window positioning after resizing
-- Position preferences are automatically saved
+- Developers, testers, and designers switching window sizes frequently
+- Anyone working with fixed window sizes and positions
 
-## Use Cases
-
-- Frontend developers testing responsive layouts
-- UI designers verifying designs across different resolutions
-- Users who need precise window size control
-- Professionals working with fixed-size windows
-
-## Key Benefits
-
-- Clean and intuitive interface
-- Bilingual support (English & Chinese)
-- Automatic configuration sync
-- Free and ad-free
-
-Thank you for using Easy Window Resizer. We hope this tool brings convenience to your workflow! 
+Simple and distraction-free. Thanks for using Easy Window Resizer!

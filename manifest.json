@@ -1,32 +1,30 @@
 {
-  "manifest_version": 3,
-  "name": "__MSG_extensionName__",
-  "version": "1.0",
-  "description": "__MSG_extensionDescription__",
-  "permissions": [
-    "storage",
-    "windows",
-    "system.display"
-  ],
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16": "images/icon16.png",
-      "48": "images/icon48.png",
-      "128": "images/icon128.png"
-    }
-  },
-  "background": {
-    "service_worker": "background.js"
-  },
-  "icons": {
-    "16": "images/icon16.png",
-    "48": "images/icon48.png",
-    "128": "images/icon128.png"
-  },
-  "default_locale": "en",
-  "web_accessible_resources": [{
-    "resources": ["popup.css"],
-    "matches": ["<all_urls>"]
-  }]
-} 
+    "manifest_version": 3,
+    "name": "__MSG_extensionName__",
+    "version": "1.0.1",
+    "description": "__MSG_extensionDescription__",
+    "permissions": ["storage", "windows", "scripting", "activeTab"],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "images/icon16.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        }
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "icons": {
+        "16": "images/icon16.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "default_locale": "en",
+    "web_accessible_resources": [
+        {
+            "resources": ["popup.css"],
+            "matches": ["<all_urls>"]
+        }
+    ]
+}
