@@ -1,5 +1,8 @@
 # Easy Window Resizer 开发说明
 
+
+[![Available in the Chrome Web Store](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/iNEddTyWiMfLSwFD6qGq.png)](https://chromewebstore.google.com/detail/easy-window-resizer/hookmbjihljbnldhphbjbakfbeppogag)
+
 一款用于一键调整浏览器窗口尺寸与位置的 Chrome 扩展。近期更新聚焦于“仅在当前屏幕内定位”，在多显示器环境中不再跳到其他屏幕，并精简为最小必要权限。
 
 ## 功能概览
