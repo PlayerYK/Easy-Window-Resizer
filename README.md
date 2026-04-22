@@ -1,16 +1,17 @@
 # Easy Window Resizer 开发说明
 
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/hookmbjihljbnldhphbjbakfbeppogag?style=flat-square&logo=google-chrome&logoColor=white&label=Chrome%20Web%20Store&color=4285F4)](https://chromewebstore.google.com/detail/easy-window-resizer/hookmbjihljbnldhphbjbakfbeppogag)
 
-[![Available in the Chrome Web Store](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/iNEddTyWiMfLSwFD6qGq.png)](https://chromewebstore.google.com/detail/easy-window-resizer/hookmbjihljbnldhphbjbakfbeppogag)
+[English](./README.en.md) | 简体中文
 
-一款用于一键调整浏览器窗口尺寸与位置的 Chrome 扩展。近期更新聚焦于“仅在当前屏幕内定位”，在多显示器环境中不再跳到其他屏幕，并精简为最小必要权限。
+一款用于一键调整浏览器窗口尺寸与位置的 Chrome 扩展。近期更新聚焦于"仅在当前屏幕内定位"，在多显示器环境中不再跳到其他屏幕，并精简为最小必要权限。
 
 ## 功能概览
 
 - 预设尺寸：内置常用分辨率，一键应用，支持删除
 - 自定义尺寸：任意输入宽高，可保存为预设，支持一键获取当前尺寸
 - 最近使用：自动记录最近 5 个尺寸，便于复用
-- 位置控制：左上 / 右上 / 居中 / 左下 / 右下；调整尺寸后自动在“当前屏幕”内定位
+- 位置控制：左上 / 右上 / 居中 / 左下 / 右下；调整尺寸后自动在"当前屏幕"内定位
 
 ## 近期更新（面向开发者）
 
@@ -40,8 +41,8 @@
 1. Chrome 网上应用店安装
 2. 或手动加载：
    - 打开 `chrome://extensions/`
-   - 开启“开发者模式”
-   - 选择“加载已解压的扩展程序”，指向项目目录
+   - 开启"开发者模式"
+   - 选择"加载已解压的扩展程序"，指向项目目录
 
 ## 打包
 
@@ -63,7 +64,7 @@
 
 ## 兼容性与边界
 
-- 平台：macOS / Windows（多显示器支持，始终保持在“当前屏”内）
+- 平台：macOS / Windows（多显示器支持，始终保持在"当前屏"内）
 - 特殊页面：`chrome://`、扩展商店等页面无法注入脚本，降级为仅改尺寸
 - 窗口状态：最大化/全屏会先恢复到 normal 再移动
 
