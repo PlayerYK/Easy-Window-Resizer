@@ -22,10 +22,17 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-// 获取活动标签页的 tabId（无需 tabs 权限）
-async function getActiveTabId() {
+// 获取指定窗口的活动标签页 tabId（无需 tabs 权限）
+async function getActiveTabId(windowId) {
   try {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const query = { active: true };
+    if (Number.isInteger(windowId)) {
+      query.windowId = windowId;
+    } else {
+      query.currentWindow = true;
+    }
+
+    const tabs = await chrome.tabs.query(query);
     return tabs?.[0]?.id ?? null;
   } catch (e) {
     console.warn('获取活动标签页失败:', e);
@@ -34,8 +41,8 @@ async function getActiveTabId() {
 }
 
 // 从活动标签页注入脚本，获取当前屏幕的可用区域
-async function getCurrentScreenBounds() {
-  const tabId = await getActiveTabId();
+async function getCurrentScreenBounds(windowId) {
+  const tabId = await getActiveTabId(windowId);
   if (!tabId) return null;
   try {
     const [injectionResult] = await chrome.scripting.executeScript({
@@ -65,7 +72,7 @@ async function getCurrentScreenBounds() {
 // 处理窗口位置的函数（在“当前屏幕”内定位）
 async function setWindowPosition(windowId, position) {
   try {
-    const bounds = await getCurrentScreenBounds();
+    const bounds = await getCurrentScreenBounds(windowId);
 
     // 获取窗口信息
     let win = await chrome.windows.get(windowId);
@@ -121,10 +128,18 @@ async function setWindowPosition(windowId, position) {
 // 消息监听器
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'setWindowPosition') {
-    chrome.windows.getCurrent(async (window) => {
-      await setWindowPosition(window.id, request.position);
-      sendResponse({ success: true });
-    });
+    const windowId = Number.isInteger(request.windowId) ? request.windowId : null;
+
+    if (windowId !== null) {
+      setWindowPosition(windowId, request.position).then(() => {
+        sendResponse({ success: true });
+      });
+    } else {
+      chrome.windows.getCurrent(async (window) => {
+        await setWindowPosition(window.id, request.position);
+        sendResponse({ success: true });
+      });
+    }
     return true; // 保持消息通道开启
   }
 });

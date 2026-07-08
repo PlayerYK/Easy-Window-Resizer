@@ -137,11 +137,12 @@ async function handleAsyncOperation(operation, errorMessageKey) {
 }
 
 // 添加 setWindowPosition 函数
-async function setWindowPosition(position) {
+async function setWindowPosition(position, windowId) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage({
       action: 'setWindowPosition',
-      position: position
+      position: position,
+      windowId: windowId
     }, response => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
@@ -155,13 +156,13 @@ async function setWindowPosition(position) {
 // 修改 resizeWindow 函数
 async function resizeWindow(width, height) {
   await handleAsyncOperation(async () => {
-    const window = await chrome.windows.getCurrent();
-    await chrome.windows.update(window.id, { width, height });
+    const currentWindow = await chrome.windows.getCurrent();
+    await chrome.windows.update(currentWindow.id, { width, height });
     
     // 获取保存的位置设置并应用
     const { windowPosition } = await chrome.storage.sync.get(['windowPosition']);
     if (windowPosition) {
-      await setWindowPosition(windowPosition);
+      await setWindowPosition(windowPosition, currentWindow.id);
     }
   }, 'resizeError');
 }
@@ -269,7 +270,8 @@ document.querySelectorAll('.position-btn').forEach(btn => {
     btn.classList.add('active');
     
     // 立即应用到当前窗口
-    await setWindowPosition(position);
+    const currentWindow = await chrome.windows.getCurrent();
+    await setWindowPosition(position, currentWindow.id);
   });
 });
 
