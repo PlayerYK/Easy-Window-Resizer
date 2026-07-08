@@ -1,0 +1,4 @@
+node_modules/
+dist/
+.DS_Store
+Easy_window_resizer_v*.zip

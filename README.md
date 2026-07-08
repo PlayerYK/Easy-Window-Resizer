@@ -40,26 +40,53 @@
 
 1. Chrome 网上应用店安装
 2. 或手动加载：
+   - 执行 `npm install`
+   - 执行 `npm run build`
    - 打开 `chrome://extensions/`
    - 开启"开发者模式"
-   - 选择"加载已解压的扩展程序"，指向项目目录
+   - 选择"加载已解压的扩展程序"，指向 `dist/Easy-window-resizer`
 
 ## 打包
 
-提供 Windows/Mac/Linux 脚本，按 `manifest.json` 版本输出 `Easy_window_resizer_v[版本号].zip`，并排除非必要文件。
+使用 npm 脚本构建解压目录：
 
-- Windows：运行 `build.bat`
-- Mac/Linux：首次执行 `chmod +x build.sh`，然后 `./build.sh`
+```bash
+npm install
+npm run build
+```
+
+每次执行 `npm run build` 都会先清空 `dist/`，再自动递增 `src/manifest.json` 版本号，并生成解压后的扩展目录：
+
+- `dist/Easy-window-resizer`
+
+需要生成 Chrome Web Store 上传包时，执行：
+
+```bash
+npm run pack
+```
+
+`npm run pack` 会先重新执行一次 build，因此同样会清空 `dist/`，再生成：
+
+- `dist/Easy-window-resizer-{version}.zip`
+
+`npm run package` 是 `npm run pack` 的别名。
 
 ## 项目结构
 
 ```
-├── manifest.json        # 扩展配置
-├── background.js        # 后台：定位逻辑、消息处理
-├── popup.html/.css/.js  # 弹窗 UI 与交互
-├── i18n.js              # 国际化初始化
-├── _locales/            # 语言资源（en, zh_CN）
-└── images/              # 图标
+├── package.json         # npm 打包脚本
+├── scripts/build.mjs    # 版本递增、复制解压产物
+├── scripts/package.mjs  # 基于 dist 生成 zip
+├── src/                 # 扩展源代码
+│   ├── manifest.json    # 扩展配置
+│   ├── background.js    # 后台：定位逻辑、消息处理
+│   ├── popup.html       # 弹窗结构
+│   ├── popup.css        # 弹窗样式
+│   ├── popup.js         # 弹窗交互
+│   ├── i18n.js          # 国际化初始化
+│   ├── _locales/        # 语言资源（en, zh_CN）
+│   └── images/          # 图标
+└── dist/                # 构建产物（npm run build 生成）
 ```
 
 ## 兼容性与边界

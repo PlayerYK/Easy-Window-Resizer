@@ -1,9 +1,14 @@
 {
     "manifest_version": 3,
     "name": "__MSG_extensionName__",
-    "version": "1.0.1",
+    "version": "1.0.10",
     "description": "__MSG_extensionDescription__",
-    "permissions": ["storage", "windows", "scripting", "activeTab"],
+    "permissions": [
+        "storage",
+        "windows",
+        "scripting",
+        "activeTab"
+    ],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
@@ -23,8 +28,12 @@
     "default_locale": "en",
     "web_accessible_resources": [
         {
-            "resources": ["popup.css"],
-            "matches": ["<all_urls>"]
+            "resources": [
+                "popup.css"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
         }
     ]
 }

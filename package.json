@@ -1,0 +1,13 @@
+{
+  "name": "easy-window-resizer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "pack": "npm run build && node scripts/package.mjs",
+    "package": "npm run pack"
+  },
+  "devDependencies": {
+    "yazl": "^3.3.1"
+  }
+}
