@@ -8,10 +8,22 @@
     "description": "扩展的描述"
   },
   "predefinedSizes": {
-    "message": "预定义尺寸"
+    "message": "预设"
   },
   "recentSizes": {
-    "message": "最近使用"
+    "message": "最近"
+  },
+  "windowSize": {
+    "message": "窗口尺寸"
+  },
+  "sizeLists": {
+    "message": "尺寸列表"
+  },
+  "noPredefinedSizes": {
+    "message": "还没有保存的尺寸。"
+  },
+  "noRecentSizes": {
+    "message": "还没有最近使用的尺寸。"
   },
   "customSize": {
     "message": "自定义尺寸"
@@ -56,6 +68,28 @@
   "removeFromRecent": {
     "message": "从最近使用中移除"
   },
+  "deleteSize": {
+    "message": "删除 $WIDTH$ × $HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "removeRecentSize": {
+    "message": "从最近使用中移除 $WIDTH$ × $HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
   "invalidSizeError": {
     "message": "请输入有效的宽度和高度"
   },
@@ -80,11 +114,20 @@
   "getCurrentSize": {
     "message": "获取当前尺寸"
   },
+  "getCurrentSizeError": {
+    "message": "获取当前尺寸失败:"
+  },
   "duplicateSizeError": {
     "message": "该尺寸已存在！"
   },
   "windowPosition": {
-    "message": "调整尺寸后窗口位置"
+    "message": "窗口位置"
+  },
+  "positionAppliesImmediately": {
+    "message": "点击立即应用，并用于后续调整"
+  },
+  "positionError": {
+    "message": "设置窗口位置失败:"
   },
   "topLeft": {
     "message": "左上角"

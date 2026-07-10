@@ -2,51 +2,74 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <h1 data-i18n="extensionName"></h1>
+  <main class="popup-shell">
+    <header class="app-header">
+      <h1 data-i18n="extensionName"></h1>
+      <a class="feedback-link" href="https://forms.gle/EEUW5SXdhwi4QHmp6" target="_blank" rel="noopener" data-i18n="feedback"></a>
+    </header>
 
-  <div class="section">
-    <h2 data-i18n="predefinedSizes"></h2>
-    <div id="predefined-sizes"></div>
-  </div>
-
-  <div class="section">
-    <h2 data-i18n="recentSizes"></h2>
-    <div id="recent-sizes"></div>
-  </div>
-
-  <div class="custom-size">
-    <h2 data-i18n="customSize"></h2>
-    <div class="input-container">
-      <div class="size-input-group">
-        <input type="number" id="width" data-i18n-placeholder="width" min="100">
-        <span class="unit">px</span>
+    <section class="size-section" aria-labelledby="size-heading">
+      <div class="section-heading size-heading-row">
+        <h2 id="size-heading" data-i18n="windowSize"></h2>
+        <div class="size-tabs" role="tablist" aria-label="Size lists" data-i18n-aria-label="sizeLists">
+          <button id="predefined-tab" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="predefined-panel" tabindex="0" data-tab="predefined"><span data-i18n="predefinedSizes"></span></button>
+          <button id="recent-tab" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="recent-panel" tabindex="-1" data-tab="recent"><span data-i18n="recentSizes"></span><span id="recent-count" class="tab-count" aria-hidden="true">0</span></button>
+        </div>
       </div>
-      <div class="size-input-group">
-        <input type="number" id="height" data-i18n-placeholder="height" min="100">
-        <span class="unit">px</span>
+
+      <div id="predefined-panel" class="size-panel" role="tabpanel" aria-labelledby="predefined-tab">
+        <div id="predefined-sizes" class="size-grid"></div>
       </div>
-      <button id="add-custom" data-i18n="add"></button>
-    </div>
-    <button id="getCurrentSize" data-i18n="getCurrentSize"></button>
-  </div>
+      <div id="recent-panel" class="size-panel" role="tabpanel" aria-labelledby="recent-tab" hidden>
+        <div id="recent-sizes" class="size-grid"></div>
+        <p id="recent-empty" class="empty-state" data-i18n="noRecentSizes" hidden></p>
+      </div>
+    </section>
 
-  <div class="window-position">
-    <h2 data-i18n="windowPosition"></h2>
-    <div class="position-buttons">
-      <button class="position-btn" data-position="topLeft" data-i18n="topLeft"></button>
-      <button class="position-btn" data-position="topRight" data-i18n="topRight"></button>
-      <button class="position-btn" data-position="center" data-i18n="center"></button>
-      <button class="position-btn" data-position="bottomLeft" data-i18n="bottomLeft"></button>
-      <button class="position-btn" data-position="bottomRight" data-i18n="bottomRight"></button>
-    </div>
-  </div>
+    <details class="custom-size" id="custom-size-panel">
+      <summary data-i18n="customSize"></summary>
+      <div class="custom-size-content">
+        <div class="input-container">
+          <label class="size-input-group">
+            <span class="field-label" data-i18n="width"></span>
+            <span class="field-control">
+              <input type="number" id="width" min="100" inputmode="numeric" data-i18n-placeholder="width">
+              <span class="unit">px</span>
+            </span>
+          </label>
+          <span class="dimension-separator" aria-hidden="true">×</span>
+          <label class="size-input-group">
+            <span class="field-label" data-i18n="height"></span>
+            <span class="field-control">
+              <input type="number" id="height" min="100" inputmode="numeric" data-i18n-placeholder="height">
+              <span class="unit">px</span>
+            </span>
+          </label>
+          <button id="add-custom" class="primary-button" type="button" data-i18n="add"></button>
+        </div>
+        <button id="getCurrentSize" class="text-button" type="button" data-i18n="getCurrentSize"></button>
+        <p id="custom-size-error" class="form-error" role="alert" aria-live="polite" hidden></p>
+      </div>
+    </details>
 
-  <div class="feedback-section">
-    <a href="https://forms.gle/EEUW5SXdhwi4QHmp6" target="_blank" data-i18n="feedback">Feedback</a>
-  </div>
+    <section class="window-position" aria-labelledby="position-heading">
+      <div class="section-heading position-heading-row">
+        <h2 id="position-heading" data-i18n="windowPosition"></h2>
+        <span class="section-hint" data-i18n="positionAppliesImmediately"></span>
+      </div>
+      <div class="position-buttons" role="group" aria-labelledby="position-heading">
+        <button class="position-btn" type="button" data-position="topLeft" data-i18n="topLeft"></button>
+        <button class="position-btn" type="button" data-position="topRight" data-i18n="topRight"></button>
+        <button class="position-btn" type="button" data-position="center" data-i18n="center"></button>
+        <button class="position-btn" type="button" data-position="bottomLeft" data-i18n="bottomLeft"></button>
+        <button class="position-btn" type="button" data-position="bottomRight" data-i18n="bottomRight"></button>
+      </div>
+    </section>
+  </main>
 
   <script src="i18n.js"></script>
   <script src="popup.js"></script>

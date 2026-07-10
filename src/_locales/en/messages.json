@@ -8,10 +8,22 @@
     "description": "The description of the extension"
   },
   "predefinedSizes": {
-    "message": "Predefined Sizes"
+    "message": "Presets"
   },
   "recentSizes": {
-    "message": "Recent Sizes"
+    "message": "Recent"
+  },
+  "windowSize": {
+    "message": "Window Size"
+  },
+  "sizeLists": {
+    "message": "Size lists"
+  },
+  "noPredefinedSizes": {
+    "message": "No saved sizes yet."
+  },
+  "noRecentSizes": {
+    "message": "No recent sizes yet."
   },
   "customSize": {
     "message": "Custom Size"
@@ -56,6 +68,28 @@
   "removeFromRecent": {
     "message": "Remove from recent"
   },
+  "deleteSize": {
+    "message": "Delete $WIDTH$ × $HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "removeRecentSize": {
+    "message": "Remove $WIDTH$ × $HEIGHT$ from recent",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
   "invalidSizeError": {
     "message": "Please enter valid width and height"
   },
@@ -80,11 +114,20 @@
   "getCurrentSize": {
     "message": "Get Current Size"
   },
+  "getCurrentSizeError": {
+    "message": "Failed to get the current size:"
+  },
   "duplicateSizeError": {
     "message": "This size already exists!"
   },
   "windowPosition": {
-    "message": "Window Position after resizing"
+    "message": "Window Position"
+  },
+  "positionAppliesImmediately": {
+    "message": "Applies now and after resizing"
+  },
+  "positionError": {
+    "message": "Failed to set the window position:"
   },
   "topLeft": {
     "message": "Top Left"
@@ -104,4 +147,4 @@
   "feedback": {
     "message": "Feedback & Suggestions"
   }
-} 
+}

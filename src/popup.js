@@ -1,133 +1,217 @@
-// 添加配置常量
 const CONFIG = {
   MAX_RECENT_SIZES: 5,
   MIN_WINDOW_SIZE: 100,
   DEFAULT_SIZES: [
-    { width: 1920, height: 1080, name: "1920x1080" },
-    { width: 1366, height: 768, name: "1366x768" },
-    { width: 1280, height: 720, name: "1280x720" },
-    { width: 1280, height: 760, name: "1280x760" }
+    { width: 1920, height: 1080, name: '1920x1080' },
+    { width: 1366, height: 768, name: '1366x768' },
+    { width: 1280, height: 720, name: '1280x720' },
+    { width: 1280, height: 760, name: '1280x760' }
   ]
 };
 
-// 预定义尺寸列表
-let predefinedSizes = CONFIG.DEFAULT_SIZES;
+let predefinedSizes = [...CONFIG.DEFAULT_SIZES];
+let recentSizes = [];
+let positionActionInFlight = false;
 
-// 添加防抖函数
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+document.addEventListener('DOMContentLoaded', initializePopup);
 
-// 初始化
-document.addEventListener('DOMContentLoaded', async () => {
+async function initializePopup() {
+  setupSizeTabs();
+  setupCustomSizeControls();
+  setupPositionButtons();
+
+  renderPredefinedSizes();
+  renderRecentSizes([]);
+
   try {
-    // 获取存储的数据
-    const storage = await chrome.storage.sync.get(['recentSizes', 'predefinedSizes', 'windowPosition']);
-    
-    if (storage.predefinedSizes) {
-      predefinedSizes = storage.predefinedSizes;
+    const storage = await chrome.storage.sync.get([
+      'recentSizes',
+      'predefinedSizes',
+      'windowPosition'
+    ]);
+
+    if (Array.isArray(storage.predefinedSizes)) {
+      predefinedSizes = normalizeSizes(storage.predefinedSizes);
     }
-    
-    // 渲染所有尺寸列表
+
+    recentSizes = normalizeSizes(storage.recentSizes || []).slice(0, CONFIG.MAX_RECENT_SIZES);
+
     renderPredefinedSizes();
-    renderRecentSizes(storage.recentSizes || []);
-    
-    // 绑定自定义尺寸添加按钮事件
-    document.getElementById('add-custom').addEventListener('click', addCustomSize);
-
-    // 添加获取当前尺寸按钮的事件监听
-    document.getElementById('getCurrentSize').addEventListener('click', 
-      debounce(async () => {
-        // 获取当前窗口信息
-        const currentWindow = await chrome.windows.getCurrent();
-        
-        // 填充到输入框
-        document.getElementById('width').value = currentWindow.width;
-        document.getElementById('height').value = currentWindow.height;
-
-        const newSize = {
-          width: currentWindow.width,
-          height: currentWindow.height,
-          name: `${currentWindow.width}x${currentWindow.height
-}`      };
-
-        // 添加到最近使用的尺寸列表
-        const storage = await chrome.storage.sync.get(['recentSizes']);
-        const recentSizes = storage.recentSizes || [];
-        const updatedSizes = [newSize, ...recentSizes.filter(size => 
-          size.width !== newSize.width || size.height !== newSize.height
-        )].slice(0, 10); // 保留最近10个尺寸
-
-        // 保存到 storage
-        await chrome.storage.sync.set({ recentSizes: updatedSizes });
-        
-        // 刷新显示
-        renderRecentSizes(updatedSizes);
-      }, 300)
-    );
-
-    // 在页面加载时设置当前选中的位置
-    if (storage.windowPosition) {
-      const btn = document.querySelector(`[data-position="${storage.windowPosition}"]`);
-      if (btn) {
-        btn.classList.add('active');
-      }
-    }
+    renderRecentSizes(recentSizes);
+    setSelectedPosition(storage.windowPosition || null);
   } catch (error) {
     console.error(chrome.i18n.getMessage('initError'), error);
   }
-});
+}
 
-// 合并 renderPredefinedSizes 和 renderRecentSizes 函数，因为它们的逻辑非常相似
-function renderSizeList(sizes, containerId, isRecent = false) {
-  const container = document.getElementById(containerId);
-  const html = sizes.map(size => `
-    <div class="size-item" data-width="${size.width}" data-height="${size.height}">
-      <div class="size-item-content">
-        <span class="size-text">${chrome.i18n.getMessage('sizeFormat', [size.width, size.height])}</span>
-        <span class="delete-btn" title="${chrome.i18n.getMessage(isRecent ? 'removeFromRecent' : 'delete')}">×</span>
-      </div>
-      <button class="apply-btn" title="${chrome.i18n.getMessage('resizeWindowTo', [size.width, size.height])}">${chrome.i18n.getMessage('apply')}</button>
-    </div>
-  `).join('');
-  
-  container.innerHTML = html;
-  
-  // 添加点击事件
-  container.querySelectorAll('.size-item').forEach(item => {
-    item.querySelector('.apply-btn').addEventListener('click', () => {
-      const width = parseInt(item.dataset.width);
-      const height = parseInt(item.dataset.height);
-      resizeWindow(width, height);
-      addToRecentSizes({ width, height });
+function debounce(func, wait) {
+  let timeout;
+
+  return function debounced(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+function normalizeSizes(sizes) {
+  if (!Array.isArray(sizes)) {
+    return [];
+  }
+
+  return sizes
+    .map(size => ({
+      width: Number(size?.width),
+      height: Number(size?.height),
+      name: size?.name
+    }))
+    .filter(size => (
+      Number.isInteger(size.width)
+      && Number.isInteger(size.height)
+      && size.width >= CONFIG.MIN_WINDOW_SIZE
+      && size.height >= CONFIG.MIN_WINDOW_SIZE
+    ));
+}
+
+function getMessage(key, substitutions, fallback = '') {
+  const message = substitutions === undefined
+    ? chrome.i18n.getMessage(key)
+    : chrome.i18n.getMessage(key, substitutions);
+  return message || fallback;
+}
+
+function setupSizeTabs() {
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      activateSizeTab(tab.dataset.tab);
     });
-    
-    item.querySelector('.delete-btn').addEventListener('click', () => {
-      const width = parseInt(item.dataset.width);
-      const height = parseInt(item.dataset.height);
-      isRecent ? deleteRecentSize(width, height) : deletePredefinedSize(width, height);
+
+    tab.addEventListener('keydown', event => {
+      const currentIndex = tabs.indexOf(tab);
+      let nextIndex = null;
+
+      if (event.key === 'ArrowRight') {
+        nextIndex = (currentIndex + 1) % tabs.length;
+      } else if (event.key === 'ArrowLeft') {
+        nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      } else if (event.key === 'Home') {
+        nextIndex = 0;
+      } else if (event.key === 'End') {
+        nextIndex = tabs.length - 1;
+      }
+
+      if (nextIndex !== null) {
+        event.preventDefault();
+        activateSizeTab(tabs[nextIndex].dataset.tab, { focus: true });
+      }
     });
   });
 }
 
-// 使用新的渲染函数
+function activateSizeTab(tabName, options = {}) {
+  const { focus = false } = options;
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+
+  tabs.forEach(tab => {
+    const isActive = tab.dataset.tab === tabName;
+    const panel = document.getElementById(tab.getAttribute('aria-controls'));
+
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
+    tab.tabIndex = isActive ? 0 : -1;
+
+    if (panel) {
+      panel.hidden = !isActive;
+    }
+
+    if (isActive && focus) {
+      tab.focus();
+    }
+  });
+}
+
+function renderSizeList(sizes, containerId, isRecent = false) {
+  const container = document.getElementById(containerId);
+  container.replaceChildren();
+
+  if (sizes.length === 0 && !isRecent) {
+    const emptyState = document.createElement('p');
+    emptyState.className = 'empty-state size-grid-empty';
+    emptyState.textContent = getMessage('noPredefinedSizes', undefined, 'No saved sizes yet.');
+    container.append(emptyState);
+    return;
+  }
+
+  sizes.forEach(size => {
+    const formattedSize = getMessage(
+      'sizeFormat',
+      [size.width, size.height],
+      `${size.width} × ${size.height}`
+    );
+    const resizeLabel = getMessage(
+      'resizeWindowTo',
+      [size.width, size.height],
+      `Resize window to ${formattedSize}`
+    );
+    const deleteLabel = getMessage(
+      isRecent ? 'removeRecentSize' : 'deleteSize',
+      [size.width, size.height],
+      isRecent ? `Remove ${formattedSize} from recent` : `Delete ${formattedSize}`
+    );
+
+    const item = document.createElement('div');
+    item.className = 'size-item';
+
+    const sizeButton = document.createElement('button');
+    sizeButton.type = 'button';
+    sizeButton.className = 'size-button';
+    sizeButton.dataset.width = String(size.width);
+    sizeButton.dataset.height = String(size.height);
+    sizeButton.title = resizeLabel;
+    sizeButton.setAttribute('aria-label', resizeLabel);
+    sizeButton.textContent = formattedSize;
+    sizeButton.addEventListener('click', () => {
+      void Promise.allSettled([
+        resizeWindow(size.width, size.height),
+        addToRecentSizes({ width: size.width, height: size.height })
+      ]);
+    });
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'delete-btn';
+    deleteButton.textContent = '×';
+    deleteButton.title = deleteLabel;
+    deleteButton.setAttribute('aria-label', deleteLabel);
+    deleteButton.addEventListener('click', event => {
+      event.stopPropagation();
+
+      if (isRecent) {
+        void deleteRecentSize(size.width, size.height);
+      } else {
+        void deletePredefinedSize(size.width, size.height);
+      }
+    });
+
+    item.append(sizeButton, deleteButton);
+    container.append(item);
+  });
+}
+
 function renderPredefinedSizes() {
   renderSizeList(predefinedSizes, 'predefined-sizes', false);
 }
 
 function renderRecentSizes(sizes) {
-  renderSizeList(sizes, 'recent-sizes', true);
+  recentSizes = normalizeSizes(sizes).slice(0, CONFIG.MAX_RECENT_SIZES);
+  renderSizeList(recentSizes, 'recent-sizes', true);
+
+  const emptyState = document.getElementById('recent-empty');
+  emptyState.hidden = recentSizes.length > 0;
+  document.getElementById('recent-count').textContent = String(recentSizes.length);
 }
 
-// 添加统一的错误处理函数
 async function handleAsyncOperation(operation, errorMessageKey) {
   try {
     await operation();
@@ -136,13 +220,12 @@ async function handleAsyncOperation(operation, errorMessageKey) {
   }
 }
 
-// 添加 setWindowPosition 函数
 async function setWindowPosition(position, windowId) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage({
       action: 'setWindowPosition',
-      position: position,
-      windowId: windowId
+      position,
+      windowId
     }, response => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
@@ -153,13 +236,11 @@ async function setWindowPosition(position, windowId) {
   });
 }
 
-// 修改 resizeWindow 函数
 async function resizeWindow(width, height) {
   await handleAsyncOperation(async () => {
     const currentWindow = await chrome.windows.getCurrent();
     await chrome.windows.update(currentWindow.id, { width, height });
-    
-    // 获取保存的位置设置并应用
+
     const { windowPosition } = await chrome.storage.sync.get(['windowPosition']);
     if (windowPosition) {
       await setWindowPosition(windowPosition, currentWindow.id);
@@ -167,15 +248,17 @@ async function resizeWindow(width, height) {
   }, 'resizeError');
 }
 
-// 添加到最近使用
 async function addToRecentSizes(size) {
   try {
-    const { recentSizes = [] } = await chrome.storage.sync.get(['recentSizes']);
-    // 移除重复的尺寸
-    const newRecentSizes = [size, ...recentSizes.filter(s => 
-      s.width !== size.width || s.height !== size.height
-    )].slice(0, 5); // 只保留最近5个
-    
+    const { recentSizes: storedSizes = [] } = await chrome.storage.sync.get(['recentSizes']);
+    const normalizedStoredSizes = normalizeSizes(storedSizes);
+    const newRecentSizes = [
+      size,
+      ...normalizedStoredSizes.filter(storedSize => (
+        storedSize.width !== size.width || storedSize.height !== size.height
+      ))
+    ].slice(0, CONFIG.MAX_RECENT_SIZES);
+
     await chrome.storage.sync.set({ recentSizes: newRecentSizes });
     renderRecentSizes(newRecentSizes);
   } catch (error) {
@@ -183,70 +266,126 @@ async function addToRecentSizes(size) {
   }
 }
 
-// 添加验证函数
 function validateSize(width, height) {
   if (!Number.isInteger(width) || !Number.isInteger(height)) {
     throw new Error(chrome.i18n.getMessage('invalidSizeError'));
   }
-  
+
   if (width < CONFIG.MIN_WINDOW_SIZE || height < CONFIG.MIN_WINDOW_SIZE) {
     throw new Error(chrome.i18n.getMessage('invalidSizeError'));
   }
-  
-  return true;
 }
 
-// 添加自定义尺寸
+function showCustomSizeError(message = '') {
+  const errorElement = document.getElementById('custom-size-error');
+  errorElement.textContent = message;
+  errorElement.hidden = !message;
+}
+
+function setupCustomSizeControls() {
+  const widthInput = document.getElementById('width');
+  const heightInput = document.getElementById('height');
+  const addButton = document.getElementById('add-custom');
+  const getCurrentSizeButton = document.getElementById('getCurrentSize');
+
+  addButton.addEventListener('click', () => {
+    void addCustomSize();
+  });
+
+  [widthInput, heightInput].forEach(input => {
+    input.addEventListener('input', () => showCustomSizeError());
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        void addCustomSize();
+      }
+    });
+  });
+
+  getCurrentSizeButton.addEventListener('click', debounce(() => {
+    void populateCurrentSize();
+  }, 300));
+}
+
+async function populateCurrentSize() {
+  await handleAsyncOperation(async () => {
+    const currentWindow = await chrome.windows.getCurrent();
+    const newSize = {
+      width: currentWindow.width,
+      height: currentWindow.height,
+      name: `${currentWindow.width}x${currentWindow.height}`
+    };
+
+    document.getElementById('width').value = String(currentWindow.width);
+    document.getElementById('height').value = String(currentWindow.height);
+    showCustomSizeError();
+    await addToRecentSizes(newSize);
+  }, 'getCurrentSizeError');
+}
+
 async function addCustomSize() {
-  const width = parseInt(document.getElementById('width').value);
-  const height = parseInt(document.getElementById('height').value);
-  
+  const widthInput = document.getElementById('width');
+  const heightInput = document.getElementById('height');
+  const width = Number(widthInput.value);
+  const height = Number(heightInput.value);
+
   try {
     validateSize(width, height);
-    // 检查是否已存在相同尺寸
-    const isDuplicate = predefinedSizes.some(size => 
+
+    const isDuplicate = predefinedSizes.some(size => (
       size.width === width && size.height === height
-    );
+    ));
 
     if (isDuplicate) {
-      alert(chrome.i18n.getMessage('duplicateSizeError') || '该尺寸已存在！');
-      return;
+      throw new Error(chrome.i18n.getMessage('duplicateSizeError'));
     }
 
-    const newSize = { width, height, name: `${width}×${height}` };
-    predefinedSizes.push(newSize);
-    await chrome.storage.sync.set({ predefinedSizes });
+    const newSize = { width, height, name: `${width}x${height}` };
+    const newPredefinedSizes = [...predefinedSizes, newSize];
+
+    await chrome.storage.sync.set({ predefinedSizes: newPredefinedSizes });
+    predefinedSizes = newPredefinedSizes;
     renderPredefinedSizes();
-    
-    // 清空输入框
-    document.getElementById('width').value = '';
-    document.getElementById('height').value = '';
+
+    widthInput.value = '';
+    heightInput.value = '';
+    showCustomSizeError();
+
+    document.getElementById('custom-size-panel').open = false;
+    activateSizeTab('predefined');
+
+    requestAnimationFrame(() => {
+      const newSizeButton = document.querySelector(
+        `.size-button[data-width="${width}"][data-height="${height}"]`
+      );
+      newSizeButton?.focus();
+    });
   } catch (error) {
-    alert(error.message);
-    return;
+    showCustomSizeError(error.message);
   }
 }
 
-// 删除预定义尺寸
 async function deletePredefinedSize(width, height) {
   try {
-    predefinedSizes = predefinedSizes.filter(s => 
-      s.width !== width || s.height !== height
-    );
-    await chrome.storage.sync.set({ predefinedSizes });
+    const newPredefinedSizes = predefinedSizes.filter(size => (
+      size.width !== width || size.height !== height
+    ));
+
+    await chrome.storage.sync.set({ predefinedSizes: newPredefinedSizes });
+    predefinedSizes = newPredefinedSizes;
     renderPredefinedSizes();
   } catch (error) {
     console.error(chrome.i18n.getMessage('deletePredefinedError'), error);
   }
 }
 
-// 删除最近使用尺寸
 async function deleteRecentSize(width, height) {
   try {
-    const { recentSizes = [] } = await chrome.storage.sync.get(['recentSizes']);
-    const newRecentSizes = recentSizes.filter(s => 
-      s.width !== width || s.height !== height
-    );
+    const { recentSizes: storedSizes = [] } = await chrome.storage.sync.get(['recentSizes']);
+    const newRecentSizes = normalizeSizes(storedSizes).filter(size => (
+      size.width !== width || size.height !== height
+    ));
+
     await chrome.storage.sync.set({ recentSizes: newRecentSizes });
     renderRecentSizes(newRecentSizes);
   } catch (error) {
@@ -254,34 +393,47 @@ async function deleteRecentSize(width, height) {
   }
 }
 
-// createSizeItem 函数可以删除，因为它没有被使用 
-
-// 修改位置按钮的点击事件处理
-document.querySelectorAll('.position-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const position = btn.dataset.position;
-    // 保存位置设置
-    await chrome.storage.sync.set({ windowPosition: position });
-    
-    // 更新按钮样式
-    document.querySelectorAll('.position-btn').forEach(b => {
-      b.classList.remove('active');
+function setupPositionButtons() {
+  document.querySelectorAll('.position-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      void applyWindowPosition(button.dataset.position);
     });
-    btn.classList.add('active');
-    
-    // 立即应用到当前窗口
+  });
+}
+
+function setSelectedPosition(position) {
+  document.querySelectorAll('.position-btn').forEach(button => {
+    const isSelected = button.dataset.position === position;
+    button.classList.toggle('active', isSelected);
+    button.setAttribute('aria-pressed', String(isSelected));
+  });
+}
+
+function setPositionButtonsDisabled(disabled) {
+  document.querySelectorAll('.position-btn').forEach(button => {
+    button.disabled = disabled;
+  });
+}
+
+async function applyWindowPosition(position) {
+  if (positionActionInFlight) {
+    return;
+  }
+
+  const previousPosition = document.querySelector('.position-btn.active')?.dataset.position || null;
+  positionActionInFlight = true;
+  setSelectedPosition(position);
+  setPositionButtonsDisabled(true);
+
+  try {
     const currentWindow = await chrome.windows.getCurrent();
     await setWindowPosition(position, currentWindow.id);
-  });
-});
-
-// 在页面加载时设置当前选中的位置
-document.addEventListener('DOMContentLoaded', async () => {
-  const { windowPosition } = await chrome.storage.sync.get(['windowPosition']);
-  if (windowPosition) {
-    const btn = document.querySelector(`[data-position="${windowPosition}"]`);
-    if (btn) {
-      btn.classList.add('active');
-    }
+    await chrome.storage.sync.set({ windowPosition: position });
+  } catch (error) {
+    setSelectedPosition(previousPosition);
+    console.error(chrome.i18n.getMessage('positionError'), error);
+  } finally {
+    positionActionInFlight = false;
+    setPositionButtonsDisabled(false);
   }
-});
+}

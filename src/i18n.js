@@ -10,4 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const message = element.getAttribute('data-i18n-placeholder');
     element.placeholder = chrome.i18n.getMessage(message);
   });
-}); 
+
+  // 处理无障碍标签的国际化
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
+    const message = element.getAttribute('data-i18n-aria-label');
+    element.setAttribute('aria-label', chrome.i18n.getMessage(message));
+  });
+});
