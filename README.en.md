@@ -4,21 +4,23 @@
 
 English | [简体中文](./README.md)
 
-A Chrome extension for quickly resizing and positioning browser windows. Recent updates focus on "positioning within current screen only" - windows stay on the current display in multi-monitor setups, with minimal required permissions.
+A Chrome extension for quickly resizing and positioning browser windows. Resizing restores normal window state first and checks the actual result. Positioning uses the current screen reported by the browser.
 
 ## Features
 
 - Preset Sizes: Built-in common resolutions, apply with one click, removable
 - Custom Sizes: Enter any width/height, save as preset, get current window size with one click
-- Recent History: Automatically records last 5 sizes for quick reuse
+- Recent History: Records the last 5 actual applied sizes for quick reuse
+- Actual Size: Shows the actual window size and current screen work area, with warnings for oversized requests, size mismatches, and failures
 - Position Control: Top-left / Top-right / Center / Bottom-left / Bottom-right; automatically positions within "current screen" after resizing
 
 ## Recent Updates (Developer-Focused)
 
-- Current Screen Positioning: Injects script to read `screen.availLeft/Top/Width/Height`, ensuring windows stay on the current display
+- Current Screen Positioning: Reads `screen.availLeft/Top/Width/Height` before changing the window; supports negative monitor coordinates without guessing primary-screen bounds
 - Removed ChromeOS Dependencies: Eliminated `chrome.system.display` usage to avoid failures on macOS/Windows
 - Minimal Permissions: Uses `activeTab` + `scripting` for temporary injection, avoiding sensitive `tabs` permission
-- State Handling & Fallback: Restores maximized/fullscreen to normal first; for restricted pages (e.g., `chrome://`) where injection fails, only resizes without forcing position
+- State Handling & Fallback: Waits for normal state before resizing, then checks the stable geometry. Restricted pages still support resizing and actual-size verification
+- Background Operations: Resizing continues if the popup closes. Reopening shows the last result, stored per window for the current browser session
 
 ## Permissions Explained (Manifest V3)
 
@@ -31,10 +33,11 @@ Removed: `system.display` (ChromeOS-specific, unavailable on desktop platforms).
 
 ## How It Works (Simplified)
 
-- Resize: `chrome.windows.update(windowId, { width, height })`
+- Resize: Wait for normal state, call `chrome.windows.update(windowId, { width, height })`, then poll the actual geometry instead of assuming API success means the size matches
 - Current Screen Bounds: Inject script into active tab, read `screen.availLeft/Top/Width/Height`
 - Position Calculation: Calculate target `left/top` based on screen bounds and window size, then `chrome.windows.update(windowId, { left, top })`
-- Fallback Handling: Skip positioning if injection fails (special pages), only perform resize
+- Fallback Handling: If screen lookup fails, skip positioning, mark the work area as unavailable, and still verify the actual size
+- Oversized Requests: Warn without silently shrinking the requested size. If the system adjusts the size, show and record the actual dimensions
 
 ## Installation & Usage
 
@@ -91,9 +94,12 @@ npm run pack
 
 ## Compatibility & Limitations
 
-- Platforms: macOS / Windows (multi-display support, always stays on "current screen")
+- Uses standard Chromium window APIs. Linux/Xfce window managers may modify or reject requests; verification on the target environment is still needed
+- Multiple Displays: Uses the current screen reported by Chromium; does not combine work areas for windows spanning displays. Unavailable screen bounds are not replaced with primary-monitor bounds
 - Special Pages: `chrome://`, extension store, etc. cannot inject scripts, falls back to resize only
-- Window States: Maximized/fullscreen windows are restored to normal before repositioning
+- Window States: Maximized/fullscreen windows are restored to normal before resizing and repositioning
+- Dimensions: Include the browser frame rather than just the webpage viewport. Oversized windows may extend outside the work area
+- Regression Checks: `node --test tests/*.test.mjs` uses simulated window APIs and asynchronous window-manager transitions; it does not replace platform testing
 
 ## Feedback & Contributions
 

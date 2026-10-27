@@ -146,5 +146,134 @@
   },
   "feedback": {
     "message": "Feedback & Suggestions"
+  },
+  "windowMetrics": {
+    "message": "Window measurements"
+  },
+  "actualWindowSize": {
+    "message": "Actual window size"
+  },
+  "currentScreenAvailable": {
+    "message": "Current screen available"
+  },
+  "windowMetricsHint": {
+    "message": "Window: the actual browser window size, including its frame. Screen area: the current display’s work area, excluding taskbars and other system-reserved space. Other open windows do not reduce this area. With multiple displays, uses the current screen reported by the browser."
+  },
+  "screenBoundsUnavailable": {
+    "message": "Unavailable"
+  },
+  "windowActionUnavailable": {
+    "message": "Window controls are unavailable. Close and reopen this panel to try again."
+  },
+  "resizingWindow": {
+    "message": "Resizing…"
+  },
+  "requestedWindowSize": {
+    "message": "Requested: $WIDTH$ × $HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeExceedsScreen": {
+    "message": "Exceeds the target screen’s available area ($WIDTH$ × $HEIGHT$). Part of the window may be off screen.",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeResultMismatch": {
+    "message": "The system applied $WIDTH$ × $HEIGHT$, which differs from the requested size.",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "screenBoundsUnknownHint": {
+    "message": "Screen area unavailable; actual window size checked."
+  },
+  "resizePositionFailed": {
+    "message": "The size was applied, but the window could not be positioned."
+  },
+  "resizeFailed": {
+    "message": "The window size could not be applied."
+  },
+  "resizeCompleted": {
+    "message": "The actual window size matches the request."
+  },
+  "windowMetricsFailed": {
+    "message": "The current window size could not be read."
+  },
+  "positionFailed": {
+    "message": "The window could not be positioned."
+  },
+  "positionCompleted": {
+    "message": "The window position was applied."
+  },
+  "resizeNotSettled": {
+    "message": "Size still changing; check again shortly."
+  },
+  "actualWindowSizeShort": {
+    "message": "Window"
+  },
+  "currentScreenAvailableShort": {
+    "message": "Screen area"
+  },
+  "resizeOversizeCompact": {
+    "message": "Requested size exceeds available $WIDTH$ × $HEIGHT$.",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeMismatchCompact": {
+    "message": "Requested $REQUESTWIDTH$ × $REQUESTHEIGHT$; applied $ACTUALWIDTH$ × $ACTUALHEIGHT$.",
+    "placeholders": {
+      "requestwidth": {
+        "content": "$1"
+      },
+      "requestheight": {
+        "content": "$2"
+      },
+      "actualwidth": {
+        "content": "$3"
+      },
+      "actualheight": {
+        "content": "$4"
+      }
+    }
+  },
+  "resizeOversizeMismatchCompact": {
+    "message": "$REQUESTWIDTH$ × $REQUESTHEIGHT$ exceeds the work area; applied $ACTUALWIDTH$ × $ACTUALHEIGHT$.",
+    "placeholders": {
+      "requestwidth": {
+        "content": "$1"
+      },
+      "requestheight": {
+        "content": "$2"
+      },
+      "actualwidth": {
+        "content": "$3"
+      },
+      "actualheight": {
+        "content": "$4"
+      }
+    }
   }
 }

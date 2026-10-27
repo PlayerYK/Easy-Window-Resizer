@@ -146,5 +146,134 @@
   },
   "feedback": {
     "message": "反馈与建议"
+  },
+  "windowMetrics": {
+    "message": "窗口测量信息"
+  },
+  "actualWindowSize": {
+    "message": "实际窗口尺寸"
+  },
+  "currentScreenAvailable": {
+    "message": "当前屏幕可用区域"
+  },
+  "windowMetricsHint": {
+    "message": "窗口：当前浏览器窗口的实际尺寸，包含边框。屏幕可用：当前屏幕扣除任务栏等系统保留区域后的工作区，不扣除其他已打开窗口占用的面积。多屏时以浏览器报告的当前屏幕为准。"
+  },
+  "screenBoundsUnavailable": {
+    "message": "无法读取"
+  },
+  "windowActionUnavailable": {
+    "message": "窗口控制暂时不可用，请关闭并重新打开此面板后重试。"
+  },
+  "resizingWindow": {
+    "message": "正在调整尺寸…"
+  },
+  "requestedWindowSize": {
+    "message": "请求尺寸：$WIDTH$ × $HEIGHT$",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeExceedsScreen": {
+    "message": "超出调整时屏幕的可用区域（$WIDTH$ × $HEIGHT$），窗口可能有部分显示在屏幕外。",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeResultMismatch": {
+    "message": "系统实际应用了 $WIDTH$ × $HEIGHT$，与请求尺寸不同。",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "screenBoundsUnknownHint": {
+    "message": "无法读取当前屏幕可用区域，已核对实际尺寸。"
+  },
+  "resizePositionFailed": {
+    "message": "已调整尺寸，但未能应用窗口位置。"
+  },
+  "resizeFailed": {
+    "message": "未能应用请求的窗口尺寸。"
+  },
+  "resizeCompleted": {
+    "message": "实际窗口尺寸与请求一致。"
+  },
+  "windowMetricsFailed": {
+    "message": "无法读取当前窗口尺寸。"
+  },
+  "positionFailed": {
+    "message": "未能应用窗口位置。"
+  },
+  "positionCompleted": {
+    "message": "已应用窗口位置。"
+  },
+  "resizeNotSettled": {
+    "message": "尺寸仍在变化，请稍后再次查看。"
+  },
+  "actualWindowSizeShort": {
+    "message": "窗口"
+  },
+  "currentScreenAvailableShort": {
+    "message": "屏幕可用"
+  },
+  "resizeOversizeCompact": {
+    "message": "请求尺寸超出可用区域（$WIDTH$ × $HEIGHT$）。",
+    "placeholders": {
+      "width": {
+        "content": "$1"
+      },
+      "height": {
+        "content": "$2"
+      }
+    }
+  },
+  "resizeMismatchCompact": {
+    "message": "请求 $REQUESTWIDTH$ × $REQUESTHEIGHT$，实际 $ACTUALWIDTH$ × $ACTUALHEIGHT$。",
+    "placeholders": {
+      "requestwidth": {
+        "content": "$1"
+      },
+      "requestheight": {
+        "content": "$2"
+      },
+      "actualwidth": {
+        "content": "$3"
+      },
+      "actualheight": {
+        "content": "$4"
+      }
+    }
+  },
+  "resizeOversizeMismatchCompact": {
+    "message": "请求 $REQUESTWIDTH$ × $REQUESTHEIGHT$ 超出可用区域；实际 $ACTUALWIDTH$ × $ACTUALHEIGHT$。",
+    "placeholders": {
+      "requestwidth": {
+        "content": "$1"
+      },
+      "requestheight": {
+        "content": "$2"
+      },
+      "actualwidth": {
+        "content": "$3"
+      },
+      "actualheight": {
+        "content": "$4"
+      }
+    }
   }
 }

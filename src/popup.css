@@ -51,6 +51,14 @@ body {
 
 .app-header {
   min-height: 24px;
+  flex-wrap: nowrap;
+}
+
+.app-header h1 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 h1,
@@ -114,11 +122,122 @@ summary:focus-visible {
   color: var(--color-muted);
   font-size: 12px;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .feedback-link:hover {
   color: var(--color-primary);
   text-decoration: underline;
+}
+
+.window-metrics {
+  min-width: 0;
+  cursor: help;
+}
+
+.metrics-list {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.metrics-list > div {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  gap: 4px;
+}
+
+.metrics-list > div + div::before {
+  content: "·";
+  margin-inline-end: 4px;
+  color: var(--color-subtle);
+}
+
+.metrics-list dt {
+  flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+.metrics-list dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.resize-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--color-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.resize-feedback[hidden] {
+  display: none;
+}
+
+.resize-feedback[data-tone="warning"],
+.resize-feedback[data-tone="error"] {
+  padding: 7px 8px;
+  border: 1px solid #f28b82;
+  border-radius: 5px;
+  background: #fce8e6;
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.resize-feedback[data-tone="error"] {
+  border-color: #d93025;
+  background: #fde2df;
+  color: #a50e0e;
+}
+
+.feedback-icon {
+  display: none;
+}
+
+.resize-feedback[data-tone="warning"] .feedback-icon,
+.resize-feedback[data-tone="error"] .feedback-icon {
+  display: grid;
+  flex: 0 0 14px;
+  height: 14px;
+  margin-top: 1px;
+  place-items: center;
+  border-radius: 50%;
+  background: #d93025;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.resize-feedback p {
+  min-width: 0;
+  margin: 0;
+}
+
+.size-button:disabled,
+.text-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
 }
 
 .size-section,
@@ -475,7 +594,6 @@ summary:focus-visible {
     padding: 12px;
   }
 
-  .app-header,
   .position-heading-row {
     align-items: flex-start;
     flex-direction: column;

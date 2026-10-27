@@ -12,6 +12,25 @@
       <a class="feedback-link" href="https://forms.gle/EEUW5SXdhwi4QHmp6" target="_blank" rel="noopener" data-i18n="feedback"></a>
     </header>
 
+    <section id="window-metrics" class="window-metrics" data-i18n-aria-label="windowMetrics" aria-describedby="window-metrics-hint">
+      <dl class="metrics-list" aria-live="polite" aria-atomic="true">
+        <div>
+          <dt data-i18n="actualWindowSizeShort"></dt>
+          <dd id="actual-window-size">—</dd>
+        </div>
+        <div>
+          <dt data-i18n="currentScreenAvailableShort"></dt>
+          <dd id="screen-available-size">—</dd>
+        </div>
+      </dl>
+      <p id="window-metrics-hint" class="visually-hidden" data-i18n="windowMetricsHint"></p>
+    </section>
+
+    <div id="resize-feedback" class="resize-feedback" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <span class="feedback-icon" aria-hidden="true">!</span>
+      <p id="resize-messages"></p>
+    </div>
+
     <section class="size-section" aria-labelledby="size-heading">
       <div class="section-heading size-heading-row">
         <h2 id="size-heading" data-i18n="windowSize"></h2>

@@ -11,7 +11,10 @@ const CONFIG = {
 
 let predefinedSizes = [...CONFIG.DEFAULT_SIZES];
 let recentSizes = [];
-let positionActionInFlight = false;
+let windowActionInFlight = false;
+let currentWindowId = null;
+let latestMetrics = null;
+let metricsRefreshSequence = 0;
 
 document.addEventListener('DOMContentLoaded', initializePopup);
 
@@ -19,9 +22,11 @@ async function initializePopup() {
   setupSizeTabs();
   setupCustomSizeControls();
   setupPositionButtons();
+  setupWindowMetricsListeners();
 
   renderPredefinedSizes();
   renderRecentSizes([]);
+  void refreshWindowMetrics();
 
   try {
     const storage = await chrome.storage.sync.get([
@@ -69,6 +74,8 @@ function normalizeSizes(sizes) {
       && Number.isInteger(size.height)
       && size.width >= CONFIG.MIN_WINDOW_SIZE
       && size.height >= CONFIG.MIN_WINDOW_SIZE
+      && size.width <= 2147483647
+      && size.height <= 2147483647
     ));
 }
 
@@ -171,11 +178,9 @@ function renderSizeList(sizes, containerId, isRecent = false) {
     sizeButton.title = resizeLabel;
     sizeButton.setAttribute('aria-label', resizeLabel);
     sizeButton.textContent = formattedSize;
+    sizeButton.disabled = windowActionInFlight;
     sizeButton.addEventListener('click', () => {
-      void Promise.allSettled([
-        resizeWindow(size.width, size.height),
-        addToRecentSizes({ width: size.width, height: size.height })
-      ]);
+      void resizeWindow(size.width, size.height);
     });
 
     const deleteButton = document.createElement('button');
@@ -217,35 +222,173 @@ async function handleAsyncOperation(operation, errorMessageKey) {
     await operation();
   } catch (error) {
     console.error(chrome.i18n.getMessage(errorMessageKey), error);
+    showWindowFeedback([getMessage(errorMessageKey), error.message || String(error)], 'error');
   }
 }
 
-async function setWindowPosition(position, windowId) {
+async function sendWindowMessage(action, details = {}) {
+  if (currentWindowId === null) {
+    const currentWindow = await chrome.windows.getCurrent();
+    currentWindowId = currentWindow.id;
+  }
+
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage({
-      action: 'setWindowPosition',
-      position,
-      windowId
+      action,
+      windowId: currentWindowId,
+      ...details
     }, response => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
-      } else {
+      } else if (typeof response?.success === 'boolean') {
         resolve(response);
+      } else {
+        reject(new Error(getMessage('windowActionUnavailable')));
       }
     });
   });
 }
 
 async function resizeWindow(width, height) {
-  await handleAsyncOperation(async () => {
-    const currentWindow = await chrome.windows.getCurrent();
-    await chrome.windows.update(currentWindow.id, { width, height });
+  if (windowActionInFlight) return;
+  setWindowActionsBusy(true);
+  metricsRefreshSequence += 1;
 
-    const { windowPosition } = await chrome.storage.sync.get(['windowPosition']);
-    if (windowPosition) {
-      await setWindowPosition(windowPosition, currentWindow.id);
+  try {
+    validateSize(width, height);
+    const messages = [getMessage('resizingWindow')];
+    const bounds = latestMetrics?.bounds;
+    const oversized = bounds && (width > bounds.width || height > bounds.height);
+    if (oversized) messages.push(getMessage('resizeExceedsScreen', [bounds.width, bounds.height]));
+    showWindowFeedback(messages, oversized ? 'warning' : 'info', { width, height },
+      oversized ? getMessage('resizeOversizeCompact', [bounds.width, bounds.height]) : messages[0]);
+
+    const response = await sendWindowMessage('resizeWindow', { width, height });
+    displayWindowMetrics(response);
+    displayResizeResult(response.result, response.error);
+    const { recentSizes: savedRecent = [] } = await chrome.storage.sync.get(['recentSizes']);
+    renderRecentSizes(savedRecent);
+  } catch (error) {
+    showWindowFeedback([getMessage('resizeFailed'), error.message || String(error)], 'error', { width, height });
+  } finally {
+    setWindowActionsBusy(false);
+    void refreshWindowMetrics({ showResult: false });
+  }
+}
+
+function formatDimensions(size) {
+  return size && Number.isInteger(size.width) && Number.isInteger(size.height)
+    ? getMessage('sizeFormat', [size.width, size.height], `${size.width} × ${size.height}`)
+    : '—';
+}
+
+function displayWindowMetrics(metrics) {
+  latestMetrics = metrics;
+  document.getElementById('actual-window-size').textContent = formatDimensions(metrics.window);
+  document.getElementById('screen-available-size').textContent = metrics.bounds
+    ? formatDimensions(metrics.bounds)
+    : getMessage('screenBoundsUnavailable');
+  document.getElementById('window-metrics').title = [
+    getMessage('windowMetricsHint'),
+    `${getMessage('actualWindowSize')}: ${formatDimensions(metrics.window)}`,
+    `${getMessage('currentScreenAvailable')}: ${metrics.bounds ? formatDimensions(metrics.bounds) : getMessage('screenBoundsUnavailable')}`
+  ].join('\n');
+}
+
+function showWindowFeedback(messages = [], tone = 'info', requested = null, summary = '') {
+  const feedback = document.getElementById('resize-feedback');
+  const details = messages.filter(Boolean);
+  document.getElementById('resize-messages').textContent = summary || details.join(' ');
+  feedback.title = [
+    requested ? getMessage('requestedWindowSize', [requested.width, requested.height]) : '',
+    ...details
+  ].filter(Boolean).join('\n');
+  feedback.dataset.tone = tone;
+  feedback.hidden = details.length === 0;
+}
+
+function displayResizeResult(result, error) {
+  if (!result) {
+    showWindowFeedback(error ? [getMessage('resizeFailed'), error] : [], error ? 'error' : 'info');
+    return;
+  }
+
+  const messages = [];
+  if (result.oversized && result.bounds) {
+    messages.push(getMessage('resizeExceedsScreen', [result.bounds.width, result.bounds.height]));
+  }
+  if (result.mismatch && result.actual) {
+    messages.push(getMessage('resizeResultMismatch', [result.actual.width, result.actual.height]));
+  }
+  if (!result.bounds) messages.push(getMessage('screenBoundsUnknownHint'));
+  if (result.unsettled) messages.push(getMessage('resizeNotSettled'));
+  if (result.positionFailed) messages.push(getMessage('resizePositionFailed'));
+  const failure = result.error || error;
+  if (failure) messages.push(getMessage('resizeFailed'), failure);
+  // The always-visible metrics line is sufficient confirmation on success.
+  const needsWarning = result.oversized || result.mismatch || result.positionFailed || result.unsettled || !result.bounds;
+  let summary = failure ? `${getMessage('resizeFailed')} ${failure}` : '';
+  if (!failure && result.mismatch && result.actual) {
+    summary = getMessage(result.oversized ? 'resizeOversizeMismatchCompact' : 'resizeMismatchCompact', [
+      result.requested.width, result.requested.height,
+      result.actual.width, result.actual.height
+    ]);
+  } else if (!failure && result.oversized && result.bounds) {
+    summary = getMessage('resizeOversizeCompact', [result.bounds.width, result.bounds.height]);
+  }
+  if (!failure && summary && result.unsettled) summary += ` ${getMessage('resizeNotSettled')}`;
+  if (!failure && summary && result.positionFailed) summary += ` ${getMessage('positionFailed')}`;
+  showWindowFeedback(messages, failure ? 'error' : needsWarning ? 'warning' : 'info', result.requested, summary);
+}
+
+async function refreshWindowMetrics({ showResult = true } = {}) {
+  const sequence = ++metricsRefreshSequence;
+  try {
+    const response = await sendWindowMessage('getWindowMetrics');
+    if (sequence !== metricsRefreshSequence || windowActionInFlight) return;
+    if (!response.success) throw new Error(response.error || getMessage('windowActionUnavailable'));
+    displayWindowMetrics(response);
+    if (showResult) {
+      const result = response.result;
+      // Moving to a different display also invalidates work-area warnings.
+      const sameScreen = ['left', 'top', 'width', 'height'].every(key => (
+        result?.bounds?.[key] === response.bounds?.[key]
+      ));
+      const stillCurrent = result && sameScreen && (result.actual
+        ? result.actual.width === response.window?.width
+          && result.actual.height === response.window?.height
+          && (response.window?.state === 'normal' || result.error)
+        : result.error);
+      displayResizeResult(stillCurrent ? result : null);
     }
-  }, 'resizeError');
+  } catch (error) {
+    if (sequence === metricsRefreshSequence && !windowActionInFlight) {
+      showWindowFeedback([getMessage('windowMetricsFailed'), error.message || String(error)], 'error');
+    }
+  }
+}
+
+function setupWindowMetricsListeners() {
+  const refresh = debounce(() => {
+    if (!windowActionInFlight) void refreshWindowMetrics();
+  }, 200);
+  chrome.windows.onBoundsChanged.addListener(changedWindow => {
+    if (changedWindow.id === currentWindowId) refresh();
+  });
+  chrome.tabs.onActivated.addListener(activeInfo => {
+    if (activeInfo.windowId === currentWindowId) refresh();
+  });
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'session' && changes[`windowResizeResult:${currentWindowId}`]) refresh();
+    if (area === 'sync' && changes.recentSizes) renderRecentSizes(changes.recentSizes.newValue || []);
+  });
+}
+
+function setWindowActionsBusy(busy) {
+  windowActionInFlight = busy;
+  document.querySelectorAll('.size-button, .position-btn, #getCurrentSize').forEach(button => {
+    button.disabled = busy;
+  });
 }
 
 async function addToRecentSizes(size) {
@@ -267,7 +410,7 @@ async function addToRecentSizes(size) {
 }
 
 function validateSize(width, height) {
-  if (!Number.isInteger(width) || !Number.isInteger(height)) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width > 2147483647 || height > 2147483647) {
     throw new Error(chrome.i18n.getMessage('invalidSizeError'));
   }
 
@@ -309,7 +452,10 @@ function setupCustomSizeControls() {
 
 async function populateCurrentSize() {
   await handleAsyncOperation(async () => {
-    const currentWindow = await chrome.windows.getCurrent();
+    const response = await sendWindowMessage('getWindowMetrics');
+    if (!response.success) throw new Error(response.error);
+    displayWindowMetrics(response);
+    const currentWindow = response.window;
     const newSize = {
       width: currentWindow.width,
       height: currentWindow.height,
@@ -409,31 +555,26 @@ function setSelectedPosition(position) {
   });
 }
 
-function setPositionButtonsDisabled(disabled) {
-  document.querySelectorAll('.position-btn').forEach(button => {
-    button.disabled = disabled;
-  });
-}
-
 async function applyWindowPosition(position) {
-  if (positionActionInFlight) {
+  if (windowActionInFlight) {
     return;
   }
 
   const previousPosition = document.querySelector('.position-btn.active')?.dataset.position || null;
-  positionActionInFlight = true;
+  setWindowActionsBusy(true);
+  metricsRefreshSequence += 1;
   setSelectedPosition(position);
-  setPositionButtonsDisabled(true);
 
   try {
-    const currentWindow = await chrome.windows.getCurrent();
-    await setWindowPosition(position, currentWindow.id);
-    await chrome.storage.sync.set({ windowPosition: position });
+    const response = await sendWindowMessage('setWindowPosition', { position });
+    displayWindowMetrics(response);
+    if (!response.success) throw new Error(response.error || getMessage('positionFailed'));
+    showWindowFeedback();
   } catch (error) {
     setSelectedPosition(previousPosition);
-    console.error(chrome.i18n.getMessage('positionError'), error);
+    showWindowFeedback([getMessage('positionFailed'), error.message || String(error)], 'error');
   } finally {
-    positionActionInFlight = false;
-    setPositionButtonsDisabled(false);
+    setWindowActionsBusy(false);
+    void refreshWindowMetrics({ showResult: false });
   }
 }
